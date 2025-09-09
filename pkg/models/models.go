@@ -91,7 +91,7 @@ type Header struct {
 	ResultID uint `json:"result_id"`
 
 	Key   string `json:"key"`
-	Value string `json:"value" gorm:"index"`
+	Value string `json:"value"`
 }
 
 type NetworkLog struct {

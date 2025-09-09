@@ -16,6 +16,7 @@ require (
 	github.com/go-rod/rod v0.116.2
 	github.com/joeguo/tldextract v0.0.0-20220507100122-d83daa6adef8
 	github.com/lair-framework/go-nmap v0.0.0-20191202052157-3507e0b03523
+	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/projectdiscovery/wappalyzergo v0.2.7
 	github.com/spf13/cobra v1.8.1
 	github.com/swaggo/http-swagger v1.3.4
@@ -83,6 +84,7 @@ require (
 	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
+	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.61.4 // indirect
 	modernc.org/mathutil v1.6.0 // indirect

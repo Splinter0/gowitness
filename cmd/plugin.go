@@ -5,11 +5,19 @@ import (
 	"net/url"
 	"strings"
 
+	"image"
+	_ "image/jpeg"
+	"os"
+
 	"github.com/joeguo/tldextract"
 	"github.com/sensepost/gowitness/internal/ascii"
 	"github.com/sensepost/gowitness/pkg/database"
 	"github.com/sensepost/gowitness/pkg/log"
+	"github.com/sensepost/gowitness/pkg/models"
 	"github.com/spf13/cobra"
+
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
 )
 
 var pluginCmd = &cobra.Command{
@@ -80,9 +88,39 @@ var pathsCmd = &cobra.Command{
 	},
 }
 
+var qrCmd = &cobra.Command{
+	Use:   "qr",
+	Short: "Extract detected QR codes in screenshots",
+	Long:  "Extract detected QR codes in screenshots",
+	Run: func(cmd *cobra.Command, args []string) {
+		c, err := database.Connection(opts.Writer.DbURI, true, false)
+		if err != nil {
+			log.Fatal("failed to connect to database", "error", err)
+		}
+		var results []models.Result
+		c.Find(&results)
+		qrReader := qrcode.NewQRCodeReader()
+		for _, r := range results {
+			file, _ := os.Open(opts.Scan.ScreenshotPath + "/" + r.Filename)
+			img, _, err := image.Decode(file)
+			if err != nil {
+				continue
+			}
+			bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+			result, _ := qrReader.Decode(bmp, nil)
+			if result == nil {
+				continue
+			}
+
+			fmt.Println(r.URL, result)
+		}
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(pluginCmd)
 	pluginCmd.PersistentFlags().StringVar(&opts.Writer.DbURI, "write-db-uri", "sqlite://gowitness.sqlite3", "The database URI to use. Supports SQLite, Postgres, and MySQL (e.g., postgres://user:pass@host:port/db)")
 	pluginCmd.AddCommand(pathsCmd)
+	pluginCmd.AddCommand(qrCmd)
 
 }
