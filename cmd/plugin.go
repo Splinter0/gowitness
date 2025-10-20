@@ -31,10 +31,41 @@ type NetworkLogResult struct {
 	Log string
 }
 
-func GenerateParentPaths(rawURL string) ([]string, error) {
+var commonExtensions []string = []string{
+	".png",
+	".jpg",
+	".jpeg",
+	".svg",
+	".js",
+	".css",
+	".ttf",
+	".woff",
+	".woff2",
+	".webp",
+}
+
+func isFile(path string) bool {
+	for _, c := range commonExtensions {
+		if strings.Contains(path, c) {
+			return true
+		}
+	}
+	return false
+}
+
+func GenerateParentPaths(rawURL string) (results []string, err error) {
+	if rawURL == "about:blank" {
+		return
+	}
+	if strings.HasPrefix(rawURL, "blob:") {
+		rawURL = strings.Replace(rawURL, "blob:", "", 1)
+	}
+	if !strings.HasPrefix(rawURL, "http") {
+		return
+	}
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	// Get the path without query/fragment
@@ -43,17 +74,19 @@ func GenerateParentPaths(rawURL string) ([]string, error) {
 	p = strings.TrimSuffix(p, "/")
 
 	segments := strings.Split(p, "/")
-	var results []string
 
 	// Build progressively shorter paths (but not the file itself)
 	for i := len(segments) - 1; i > 0; i-- {
+		/*if isFile(segments[i]) {
+			continue
+		}*/
 		joined := strings.Join(segments[:i], "/") + "/"
 		u := *parsed
 		u.Path = joined
 		results = append(results, strings.Split(u.String(), "?")[0])
 	}
 
-	return results, nil
+	return
 }
 
 var pathsCmd = &cobra.Command{
