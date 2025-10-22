@@ -75,8 +75,7 @@ func GenerateParentPaths(rawURL string) (results []string, err error) {
 
 	segments := strings.Split(p, "/")
 
-	// Build progressively shorter paths (but not the file itself)
-	for i := len(segments) - 1; i > 0; i-- {
+	for i := len(segments); i > 0; i-- {
 		/*if isFile(segments[i]) {
 			continue
 		}*/
@@ -87,6 +86,25 @@ func GenerateParentPaths(rawURL string) (results []string, err error) {
 	}
 
 	return
+}
+
+var headersCmd = &cobra.Command{
+	Use:   "headers",
+	Short: "Extract all response and request headers",
+	Long:  ascii.LogoHelp(`Take all the visited hosts, loop through loaded resources extract header names and values`),
+	Run: func(cmd *cobra.Command, args []string) {
+		c, err := database.Connection(opts.Writer.DbURI, true, false)
+		if err != nil {
+			log.Fatal("failed to connect to database", "error", err)
+		}
+		var results []models.Header
+		tx := c.Find(&results)
+		fmt.Println(tx.Error)
+		fmt.Println(len(results))
+		for _, h := range results {
+			fmt.Println(h.Key)
+		}
+	},
 }
 
 var pathsCmd = &cobra.Command{
@@ -155,5 +173,6 @@ func init() {
 	pluginCmd.PersistentFlags().StringVar(&opts.Writer.DbURI, "write-db-uri", "sqlite://gowitness.sqlite3", "The database URI to use. Supports SQLite, Postgres, and MySQL (e.g., postgres://user:pass@host:port/db)")
 	pluginCmd.AddCommand(pathsCmd)
 	pluginCmd.AddCommand(qrCmd)
+	pluginCmd.AddCommand(headersCmd)
 
 }

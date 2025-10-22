@@ -94,6 +94,7 @@ type Header struct {
 	Value string `json:"value"`
 }
 
+// Store headers as
 type NetworkLog struct {
 	ID       uint `json:"id" gorm:"primarykey"`
 	ResultID uint `json:"result_id"`
